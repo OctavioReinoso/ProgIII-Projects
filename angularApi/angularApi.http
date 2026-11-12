@@ -1,6 +1,127 @@
-@angularApi_HostAddress = http://localhost:5042
+@host = http://localhost:5042
+# Reemplazá estos valores por los IDs que devuelve cada POST.
+@alumnoId = 1
+@docenteId = 2
+@divisionId = 1
+@materiaId = 1
+@calificacionId = 1
 
-GET {{angularApi_HostAddress}}/weatherforecast/
-Accept: application/json
+### ---------- Alta de datos ----------
 
-###
+### Crear división (turno: Manana, Tarde o Vespertino)
+POST {{host}}/Divisiones
+Content-Type: application/json
+
+{"anio":3,"letra":"A","turno":"Manana","cupo":30}
+
+### Crear alumno
+POST {{host}}/Alumnos
+Content-Type: application/json
+
+{"nombre":"Lucía","apellido":"Fernández","dni":"47123456","fechaNacimiento":"2010-04-12","legajo":"A-001"}
+
+### Crear docente
+POST {{host}}/Docentes
+Content-Type: application/json
+
+{"nombre":"Jorge","apellido":"Benítez","dni":"30123456","fechaNacimiento":"1980-09-01","titulo":"Profesor de Matemática","email":"jbenitez@escuela.edu.ar"}
+
+### Crear materia
+POST {{host}}/Materias
+Content-Type: application/json
+
+{"nombre":"Matemática","horasSemanales":5}
+
+### ---------- Relaciones ----------
+
+### Inscribir alumno en la división
+PUT {{host}}/Divisiones/{{divisionId}}/alumnos/{{alumnoId}}
+
+### Asignar docente a la materia
+PUT {{host}}/Materias/{{materiaId}}/docentes/{{docenteId}}
+
+### Cargar nota (tipo: Escrita, Oral o TrabajoPractico)
+POST {{host}}/Calificaciones
+Content-Type: application/json
+
+{"alumnoId":{{alumnoId}},"materiaId":{{materiaId}},"nota":8.5,"fecha":"2026-06-10","tipo":"Escrita","observacion":"Muy buen trabajo"}
+
+### ---------- Consultas ----------
+
+### Listar divisiones con sus alumnos
+GET {{host}}/Divisiones
+
+### Alumnos de una división
+GET {{host}}/Alumnos?divisionId={{divisionId}}
+
+### Docente con sus materias
+GET {{host}}/Docentes/{{docenteId}}
+
+### Materia con sus docentes
+GET {{host}}/Materias/{{materiaId}}
+
+### Notas de un alumno
+GET {{host}}/Calificaciones?alumnoId={{alumnoId}}
+
+### Boletín del alumno (promedio por materia y general)
+GET {{host}}/Alumnos/{{alumnoId}}/boletin
+
+### ---------- Modificaciones ----------
+
+### Modificar alumno
+PUT {{host}}/Alumnos/{{alumnoId}}
+Content-Type: application/json
+
+{"nombre":"Lucía","apellido":"Fernández","dni":"47123456","fechaNacimiento":"2010-04-12","legajo":"A-010"}
+
+### Modificar nota
+PUT {{host}}/Calificaciones/{{calificacionId}}
+Content-Type: application/json
+
+{"alumnoId":{{alumnoId}},"materiaId":{{materiaId}},"nota":9,"fecha":"2026-06-10","tipo":"Escrita"}
+
+### ---------- Errores esperados ----------
+
+### 400: DNI con puntos y fecha futura
+POST {{host}}/Alumnos
+Content-Type: application/json
+
+{"nombre":"Juan","apellido":"Paz","dni":"12.345.678","fechaNacimiento":"2999-01-01","legajo":"A-002"}
+
+### 400: campo que no existe en el DTO
+POST {{host}}/Materias
+Content-Type: application/json
+
+{"nombre":"Historia","horasSemanales":3,"docentes":[1]}
+
+### 400: nota fuera de rango
+POST {{host}}/Calificaciones
+Content-Type: application/json
+
+{"alumnoId":{{alumnoId}},"materiaId":{{materiaId}},"nota":11,"fecha":"2026-06-10","tipo":"Oral"}
+
+### 409: DNI repetido
+POST {{host}}/Docentes
+Content-Type: application/json
+
+{"nombre":"Ana","apellido":"Gómez","dni":"47123456","fechaNacimiento":"1985-01-01","titulo":"Profesora de Historia"}
+
+### 404: alumno inexistente
+GET {{host}}/Alumnos/999999
+
+### ---------- Bajas ----------
+
+### Sacar alumno de la división (no lo borra)
+DELETE {{host}}/Divisiones/{{divisionId}}/alumnos/{{alumnoId}}
+
+### Quitar docente de la materia
+DELETE {{host}}/Materias/{{materiaId}}/docentes/{{docenteId}}
+
+### Borrar nota
+DELETE {{host}}/Calificaciones/{{calificacionId}}
+
+### Borrar alumno (borra también sus notas)
+DELETE {{host}}/Alumnos/{{alumnoId}}
+
+### Borrar división (sus alumnos quedan sin división)
+DELETE {{host}}/Divisiones/{{divisionId}}
