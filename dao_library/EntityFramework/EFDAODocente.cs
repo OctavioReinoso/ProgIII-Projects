@@ -1,14 +1,15 @@
 using dao_library.Data;
+using dao_library.Interfaces;
 using entity_library;
 using Microsoft.EntityFrameworkCore;
 
-namespace dao_library;
+namespace dao_library.EntityFramework;
 
-public class DocenteDAO
+public class EFDAODocente : IDAODocente
 {
     private readonly EscuelaDbContext db;
 
-    public DocenteDAO(EscuelaDbContext db) => this.db = db;
+    public EFDAODocente(EscuelaDbContext db) => this.db = db;
 
     public Task<List<Docente>> ListarAsync() =>
         db.Docentes.AsNoTracking().Include(d => d.Materias)

@@ -1,0 +1,58 @@
+<section class="tarjeta">
+  <h2>2. FormGroup: perfil del docente</h2>
+  <p class="ayuda">Varios campos relacionados forman una unidad. El domicilio es un FormGroup dentro de otro.</p>
+
+  <form [formGroup]="perfilForm" (ngSubmit)="onSubmit()">
+    <div class="grilla">
+      <div>
+        <label for="nombre">Nombre:</label>
+        <input id="nombre" type="text" formControlName="nombre" />
+      </div>
+      <div>
+        <label for="apellido">Apellido:</label>
+        <input id="apellido" type="text" formControlName="apellido" />
+      </div>
+    </div>
+
+    <label for="titulo">Título:</label>
+    <input id="titulo" type="text" formControlName="titulo" />
+
+    <fieldset formGroupName="domicilio">
+      <legend>Domicilio (FormGroup anidado)</legend>
+      <div class="grilla">
+        <div>
+          <label for="calle">Calle:</label>
+          <input id="calle" type="text" formControlName="calle" />
+        </div>
+        <div>
+          <label for="ciudad">Ciudad:</label>
+          <input id="ciudad" type="text" formControlName="ciudad" />
+        </div>
+        <div>
+          <label for="provincia">Provincia:</label>
+          <input id="provincia" type="text" formControlName="provincia" />
+        </div>
+        <div>
+          <label for="cp">Código postal:</label>
+          <input id="cp" type="text" formControlName="codigoPostal" />
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="acciones">
+      <button type="button" class="secundario" (click)="completarEjemplo()">Completar algunos campos (patchValue)</button>
+      <button type="submit">Guardar</button>
+    </div>
+  </form>
+
+  <div class="grilla">
+    <div>
+      <p class="modelo">Valor actual del modelo:</p>
+      <pre>{{ perfilForm.value | json }}</pre>
+    </div>
+    <div>
+      <p class="modelo">Último envío (ngSubmit):</p>
+      <pre>{{ guardado ? (guardado | json) : 'Todavía no se envió.' }}</pre>
+    </div>
+  </div>
+</section>

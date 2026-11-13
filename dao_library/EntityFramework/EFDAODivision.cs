@@ -1,14 +1,15 @@
 using dao_library.Data;
+using dao_library.Interfaces;
 using entity_library;
 using Microsoft.EntityFrameworkCore;
 
-namespace dao_library;
+namespace dao_library.EntityFramework;
 
-public class DivisionDAO
+public class EFDAODivision : IDAODivision
 {
     private readonly EscuelaDbContext db;
 
-    public DivisionDAO(EscuelaDbContext db) => this.db = db;
+    public EFDAODivision(EscuelaDbContext db) => this.db = db;
 
     public Task<List<Division>> ListarAsync() =>
         db.Divisiones.AsNoTracking().Include(d => d.Alumnos)

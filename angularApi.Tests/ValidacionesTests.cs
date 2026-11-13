@@ -6,12 +6,12 @@ using static angularApi.Tests.ApiDePrueba;
 
 namespace angularApi.Tests;
 
-public class ValidacionesTests
+public abstract class ValidacionesTests : PruebasApi
 {
     [Fact]
     public async Task Crear_y_consultar_un_alumno()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
 
         var id = await CrearAlumnoAsync(cliente, legajo: "A-001", dni: "45123456");
@@ -25,7 +25,7 @@ public class ValidacionesTests
     [Fact]
     public async Task No_se_repite_el_dni_entre_alumnos_y_docentes()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         await CrearAlumnoAsync(cliente, dni: "40111222");
 
@@ -40,7 +40,7 @@ public class ValidacionesTests
     [Fact]
     public async Task No_se_repite_el_legajo()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         await CrearAlumnoAsync(cliente, legajo: "A-777");
 
@@ -59,7 +59,7 @@ public class ValidacionesTests
     [InlineData("""{"nombre":"Lu","apellido":"Paz","dni":"12345678","fechaNacimiento":"2010-01-01","legajo":"A-1","divisionId":1}""")] // campo desconocido
     public async Task Alumno_invalido_devuelve_400(string json)
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
 
         var respuesta = await cliente.PostAsync("/Alumnos", new StringContent(json, Encoding.UTF8, "application/json"));
@@ -76,7 +76,7 @@ public class ValidacionesTests
     [InlineData("""{"anio":3,"letra":"A","turno":99}""")]        // turno numérico inexistente
     public async Task Division_invalida_devuelve_400(string json)
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var respuesta = await api.CreateClient()
             .PostAsync("/Divisiones", new StringContent(json, Encoding.UTF8, "application/json"));
         Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
@@ -85,7 +85,7 @@ public class ValidacionesTests
     [Fact]
     public async Task No_puede_haber_dos_divisiones_iguales()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         await CrearDivisionAsync(cliente, "B");
 
@@ -97,7 +97,7 @@ public class ValidacionesTests
     [Fact]
     public async Task Modificar_y_eliminar_inexistentes_devuelve_404()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
 
         var put = await cliente.PutAsJsonAsync("/Materias/999", new { nombre = "Historia", horasSemanales = 3 }, Json);
@@ -112,7 +112,7 @@ public class ValidacionesTests
     [Fact]
     public async Task Modificar_un_docente()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var id = await CrearDocenteAsync(cliente, dni: "30123456");
 

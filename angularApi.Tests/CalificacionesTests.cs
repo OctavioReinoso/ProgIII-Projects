@@ -5,7 +5,7 @@ using static angularApi.Tests.ApiDePrueba;
 
 namespace angularApi.Tests;
 
-public class CalificacionesTests
+public abstract class CalificacionesTests : PruebasApi
 {
     private static object Nota(long alumnoId, long materiaId, decimal nota, string tipo = "Escrita", string fecha = "2026-06-10") =>
         new { alumnoId, materiaId, nota, fecha, tipo };
@@ -13,7 +13,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Cargar_nota_devuelve_alumno_y_materia()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumnoId = await CrearAlumnoAsync(cliente);
         var materiaId = await CrearMateriaAsync(cliente);
@@ -31,7 +31,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Nota_para_alumno_o_materia_inexistente_devuelve_404()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var materiaId = await CrearMateriaAsync(cliente);
 
@@ -45,7 +45,7 @@ public class CalificacionesTests
     [InlineData(11)]
     public async Task Nota_fuera_de_rango_devuelve_400(int valor)
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumnoId = await CrearAlumnoAsync(cliente);
         var materiaId = await CrearMateriaAsync(cliente);
@@ -58,7 +58,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Nota_con_fecha_futura_devuelve_400()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumnoId = await CrearAlumnoAsync(cliente);
         var materiaId = await CrearMateriaAsync(cliente);
@@ -71,7 +71,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Boletin_calcula_promedios_y_aprobacion()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumnoId = await CrearAlumnoAsync(cliente);
         var matematica = await CrearMateriaAsync(cliente, "Matemática");
@@ -96,7 +96,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Filtrar_calificaciones_por_alumno_y_materia()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumno1 = await CrearAlumnoAsync(cliente, "A-1");
         var alumno2 = await CrearAlumnoAsync(cliente, "A-2");
@@ -114,7 +114,7 @@ public class CalificacionesTests
     [Fact]
     public async Task Borrar_un_alumno_borra_sus_notas()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var alumnoId = await CrearAlumnoAsync(cliente);
         var materiaId = await CrearMateriaAsync(cliente);

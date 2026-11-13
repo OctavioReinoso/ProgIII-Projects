@@ -1,0 +1,104 @@
+<section class="tarjeta">
+  <h2>3. FormBuilder, validaciones y FormArray: inscripción de alumno</h2>
+  <p class="ayuda">Al enviar, el alumno se guarda en la API de la escuela (POST /Alumnos).</p>
+
+  <form [formGroup]="inscripcionForm" (ngSubmit)="onSubmit()" novalidate>
+    <div class="grilla">
+      <div>
+        <label for="i-nombre">Nombre *</label>
+        <input id="i-nombre" type="text" formControlName="nombre" [class.con-error]="invalido('nombre')" />
+        @if (invalido('nombre')) {
+          <small class="error">El nombre es obligatorio (mínimo 2 letras).</small>
+        }
+      </div>
+      <div>
+        <label for="i-apellido">Apellido *</label>
+        <input id="i-apellido" type="text" formControlName="apellido" [class.con-error]="invalido('apellido')" />
+        @if (invalido('apellido')) {
+          <small class="error">El apellido es obligatorio (mínimo 2 letras).</small>
+        }
+      </div>
+      <div>
+        <label for="i-dni">DNI *</label>
+        <input id="i-dni" type="text" inputmode="numeric" formControlName="dni" [class.con-error]="invalido('dni')" />
+        @if (invalido('dni')) {
+          <small class="error">7 u 8 dígitos, sin puntos.</small>
+        }
+      </div>
+      <div>
+        <label for="i-fecha">Fecha de nacimiento *</label>
+        <input id="i-fecha" type="date" formControlName="fechaNacimiento" [class.con-error]="invalido('fechaNacimiento')" />
+        @if (inscripcionForm.controls.fechaNacimiento.hasError('fechaFutura')) {
+          <small class="error">La fecha no puede ser futura.</small>
+        } @else if (invalido('fechaNacimiento')) {
+          <small class="error">La fecha es obligatoria.</small>
+        }
+      </div>
+      <div>
+        <label for="i-legajo">Legajo *</label>
+        <input id="i-legajo" type="text" formControlName="legajo" [class.con-error]="invalido('legajo')" />
+        @if (invalido('legajo')) {
+          <small class="error">Entre 3 y 10 caracteres.</small>
+        }
+      </div>
+    </div>
+
+    <fieldset formGroupName="tutor">
+      <legend>Tutor (FormGroup anidado)</legend>
+      <div class="grilla">
+        <div>
+          <label for="t-nombre">Nombre completo *</label>
+          <input id="t-nombre" type="text" formControlName="nombreCompleto" [class.con-error]="invalido('tutor.nombreCompleto')" />
+          @if (invalido('tutor.nombreCompleto')) {
+            <small class="error">Indicá quién es el tutor.</small>
+          }
+        </div>
+        <div>
+          <label for="t-email">Email *</label>
+          <input id="t-email" type="email" formControlName="email" [class.con-error]="invalido('tutor.email')" />
+          @if (invalido('tutor.email')) {
+            <small class="error">Ingresá un email válido.</small>
+          }
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset formArrayName="contactosEmergencia">
+      <legend>Contactos de emergencia (FormArray)</legend>
+      <button type="button" class="secundario" (click)="agregarContacto()">+ Agregar contacto</button>
+
+      @for (contacto of contactosEmergencia.controls; track contacto; let i = $index) {
+        <div class="fila-contacto" [formGroupName]="i">
+          <div>
+            <label for="c-nombre-{{ i }}">Contacto {{ i + 1 }}</label>
+            <input id="c-nombre-{{ i }}" type="text" placeholder="Nombre" formControlName="nombre"
+                   [class.con-error]="invalido('contactosEmergencia.' + i + '.nombre')" />
+          </div>
+          <div>
+            <label for="c-tel-{{ i }}">Teléfono</label>
+            <input id="c-tel-{{ i }}" type="tel" placeholder="351 555-1234" formControlName="telefono"
+                   [class.con-error]="invalido('contactosEmergencia.' + i + '.telefono')" />
+          </div>
+          <button type="button" class="quitar" (click)="quitarContacto(i)"
+                  [disabled]="contactosEmergencia.length === 1" aria-label="Quitar contacto {{ i + 1 }}">✕</button>
+        </div>
+      }
+    </fieldset>
+
+    <p class="estado">
+      Estado del formulario:
+      <strong [class.valido]="inscripcionForm.valid" [class.no-valido]="inscripcionForm.invalid">{{ inscripcionForm.status }}</strong>
+    </p>
+
+    @if (mensaje(); as m) {
+      <p class="mensaje" [class.ok]="m.tipo === 'ok'" [class.error]="m.tipo === 'error'">{{ m.texto }}</p>
+    }
+
+    <div class="acciones">
+      <button type="submit" [disabled]="enviando()">{{ enviando() ? 'Enviando...' : 'Inscribir alumno' }}</button>
+    </div>
+  </form>
+
+  <p class="modelo">Valor del modelo:</p>
+  <pre>{{ inscripcionForm.value | json }}</pre>
+</section>

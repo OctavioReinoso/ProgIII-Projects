@@ -2,13 +2,15 @@
 
 Trabajos de Programación III. Contiene:
 
-- **Ang1**: proyecto Angular (actividad 1).
+- **Ang1**: proyecto Angular con ejemplos de **Angular Forms** (ver más abajo).
+- **Patrones de diseño**: Singleton, Builder, Prototype, Factory Method y Abstract Factory. Las consignas resueltas y las respuestas a las preguntas están en [PATRONES.md](PATRONES.md).
 - **API de la escuela** (ASP.NET Core 9 + Entity Framework Core + SQL Server), dividida en capas:
 
 | Proyecto | Responsabilidad |
 |---|---|
 | `entity_library` | Entidades del dominio: `Persona`, `Alumno`, `Docente`, `Division`, `Materia`, `Calificacion` y los enums `Turno` y `TipoEvaluacion`. |
-| `dao_library` | Acceso a datos: `EscuelaDbContext`, migraciones y un DAO por entidad. |
+| `dao_library` | Acceso a datos con Abstract Factory: interfaces `IDAO*` e `IDAOFactory`, una familia Entity Framework (`EscuelaDbContext`, migraciones, `EFDAO*`) y una familia en memoria (`MockDatabase`, `MockDAO*`). |
+| `patrones_diseno` / `patrones_ts` | Ejercicios de patrones en C# y TypeScript. |
 | `angularApi` | API REST: controladores, DTOs de entrada/salida y manejo de errores. |
 | `angularApi.Tests` | Pruebas de integración con xUnit (levantan la API sobre SQLite en memoria). |
 
@@ -46,6 +48,12 @@ dotnet run --project angularApi --launch-profile http
 
 `dotnet tool restore` instala `dotnet-ef` en la versión indicada en `dotnet-tools.json`. La migración crea la base `EscuelaDB` con sus tablas.
 
+Sin SQL Server se puede usar la familia en memoria, que arranca con datos de ejemplo y no necesita migración:
+
+```powershell
+dotnet run --project angularApi --launch-profile http -- --AccesoDatos=Mock
+```
+
 Abrí [Swagger](http://localhost:5042/swagger) para probar la API. También hay ejemplos listos en `angularApi/angularApi.http`.
 
 ## Endpoints
@@ -72,4 +80,20 @@ Respuestas: POST devuelve 201; PUT y DELETE, 204. Datos inválidos o campos que 
 dotnet test angularApi.Tests
 ```
 
-No necesitan SQL Server: cada prueba levanta la API con una base SQLite en memoria.
+No necesitan SQL Server. Cada prueba se ejecuta dos veces, una por cada familia de DAOs: EF sobre SQLite en memoria y Mock.
+
+## Angular Forms (Ang1)
+
+```powershell
+cd Ang1
+npm install
+npm start          # http://localhost:4200
+```
+
+| Página | Qué muestra |
+|---|---|
+| Inicio | Los dos enfoques y la tabla de diferencias clave. |
+| FormControl | Un campo, la sincronía entre el modelo y la vista, y `setValue()`. |
+| FormGroup | Perfil de docente con `FormGroup`, domicilio anidado, `patchValue()` y `(ngSubmit)`. |
+| FormBuilder y FormArray | Inscripción de alumno con `FormBuilder`, `Validators`, un validador propio, estado del formulario y contactos de emergencia dinámicos con `@for`. Al enviar, guarda el alumno en la API (que tiene que estar corriendo). |
+| Plantillas | Suscripción a novedades con `ngModel`, para comparar con los reactivos. |

@@ -1,14 +1,16 @@
 using angularApi.Dtos;
 using dao_library;
+using dao_library.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
 
 public class DivisionesController : EscuelaControllerBase
 {
-    private readonly DivisionDAO divisionDAO;
+    private readonly IDAODivision divisionDAO;
 
-    public DivisionesController(DivisionDAO divisionDAO) => this.divisionDAO = divisionDAO;
+    // La fábrica llega por constructor: el controlador no sabe si los datos vienen de EF o del Mock.
+    public DivisionesController(IDAOFactory fabrica) => divisionDAO = fabrica.CrearDAODivision();
 
     [HttpGet]
     public async Task<ActionResult<List<DivisionResponse>>> Listar() =>

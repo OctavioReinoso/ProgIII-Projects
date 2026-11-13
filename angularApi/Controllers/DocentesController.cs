@@ -1,14 +1,16 @@
 using angularApi.Dtos;
 using dao_library;
+using dao_library.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
 
 public class DocentesController : EscuelaControllerBase
 {
-    private readonly DocenteDAO docenteDAO;
+    private readonly IDAODocente docenteDAO;
 
-    public DocentesController(DocenteDAO docenteDAO) => this.docenteDAO = docenteDAO;
+    // La fábrica llega por constructor: el controlador no sabe si los datos vienen de EF o del Mock.
+    public DocentesController(IDAOFactory fabrica) => docenteDAO = fabrica.CrearDAODocente();
 
     [HttpGet]
     public async Task<ActionResult<List<DocenteResponse>>> Listar() =>

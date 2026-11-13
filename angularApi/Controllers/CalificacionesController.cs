@@ -1,14 +1,16 @@
 using angularApi.Dtos;
 using dao_library;
+using dao_library.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
 
 public class CalificacionesController : EscuelaControllerBase
 {
-    private readonly CalificacionDAO calificacionDAO;
+    private readonly IDAOCalificacion calificacionDAO;
 
-    public CalificacionesController(CalificacionDAO calificacionDAO) => this.calificacionDAO = calificacionDAO;
+    // La fábrica llega por constructor: el controlador no sabe si los datos vienen de EF o del Mock.
+    public CalificacionesController(IDAOFactory fabrica) => calificacionDAO = fabrica.CrearDAOCalificacion();
 
     // GET /Calificaciones?alumnoId=1&materiaId=2 (los dos filtros son opcionales)
     [HttpGet]

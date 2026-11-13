@@ -5,12 +5,12 @@ using static angularApi.Tests.ApiDePrueba;
 
 namespace angularApi.Tests;
 
-public class RelacionesTests
+public abstract class RelacionesTests : PruebasApi
 {
     [Fact]
     public async Task Inscribir_alumno_en_division_se_ve_desde_los_dos_lados()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var divisionId = await CrearDivisionAsync(cliente);
         var alumnoId = await CrearAlumnoAsync(cliente);
@@ -35,7 +35,7 @@ public class RelacionesTests
     [Fact]
     public async Task Un_alumno_no_puede_estar_en_dos_divisiones()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var divisionA = await CrearDivisionAsync(cliente, "A");
         var divisionB = await CrearDivisionAsync(cliente, "B");
@@ -53,7 +53,7 @@ public class RelacionesTests
     [Fact]
     public async Task No_se_puede_superar_el_cupo_de_la_division()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var divisionId = await CrearDivisionAsync(cliente, cupo: 1);
         var primero = await CrearAlumnoAsync(cliente, "A-1");
@@ -70,7 +70,7 @@ public class RelacionesTests
     [Fact]
     public async Task Borrar_una_division_no_borra_a_sus_alumnos()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var divisionId = await CrearDivisionAsync(cliente);
         var alumnoId = await CrearAlumnoAsync(cliente);
@@ -85,7 +85,7 @@ public class RelacionesTests
     [Fact]
     public async Task Inscribir_con_ids_inexistentes_devuelve_404()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var divisionId = await CrearDivisionAsync(cliente);
 
@@ -96,7 +96,7 @@ public class RelacionesTests
     [Fact]
     public async Task Docentes_y_materias_muchos_a_muchos()
     {
-        using var api = new ApiDePrueba();
+        using var api = CrearApi();
         var cliente = api.CreateClient();
         var matematica = await CrearMateriaAsync(cliente, "Matemática");
         var fisica = await CrearMateriaAsync(cliente, "Física");

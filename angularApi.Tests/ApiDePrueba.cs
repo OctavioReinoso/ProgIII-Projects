@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using dao_library.Data;
+using dao_library.Mock;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -13,7 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace angularApi.Tests;
 
-// Levanta la API completa en memoria, cambiando SQL Server por SQLite en memoria.
+// Levanta la API completa en memoria con la familia de DAOs indicada:
+// - "EF": Entity Framework sobre SQLite en memoria (en lugar de SQL Server).
+// - "Mock": MockDatabase vacía.
 // Cada test crea su propia instancia, así las pruebas no comparten datos.
 public sealed class ApiDePrueba : WebApplicationFactory<Program>
 {
@@ -22,15 +25,29 @@ public sealed class ApiDePrueba : WebApplicationFactory<Program>
         Converters = { new JsonStringEnumConverter() }
     };
 
+    private readonly string accesoDatos;
     private readonly SqliteConnection conexion = new("Data Source=:memory:");
 
-    public ApiDePrueba() => conexion.Open();
+    public ApiDePrueba(string accesoDatos = "EF")
+    {
+        this.accesoDatos = accesoDatos;
+        conexion.Open();
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        builder.UseSetting("AccesoDatos", accesoDatos);
         builder.ConfigureTestServices(services =>
         {
+            if (accesoDatos == "Mock")
+            {
+                // Sin los datos de ejemplo, para que cada test arranque vacío.
+                services.RemoveAll<MockDatabase>();
+                services.AddSingleton(new MockDatabase());
+                return;
+            }
+
             services.RemoveAll<DbContextOptions<EscuelaDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<EscuelaDbContext>>();
             services.AddDbContext<EscuelaDbContext>(options => options.UseSqlite(conexion));

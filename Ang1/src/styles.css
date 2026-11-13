@@ -1,1 +1,144 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --fondo: #f4f6fb;
+  --tarjeta: #ffffff;
+  --texto: #1f2430;
+  --suave: #5b6475;
+  --borde: #d5dae5;
+  --primario: #2f5bd3;
+  --primario-oscuro: #2347a8;
+  --ok: #1e7b4f;
+  --ok-fondo: #e3f5ec;
+  --error: #b42318;
+  --error-fondo: #fdecea;
+  --codigo: #f0f2f7;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #12151c;
+    --tarjeta: #1b202a;
+    --texto: #e7eaf0;
+    --suave: #a3abba;
+    --borde: #343b4a;
+    --primario: #6d8ff0;
+    --primario-oscuro: #8ba6f5;
+    --ok: #6fd3a0;
+    --ok-fondo: #173326;
+    --error: #ff8a80;
+    --error-fondo: #3a1d1b;
+    --codigo: #232937;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+.encabezado {
+  background: var(--tarjeta);
+  border-bottom: 1px solid var(--borde);
+  padding: 16px;
+}
+.encabezado h1 { margin: 0 0 8px; font-size: 1.4rem; }
+.encabezado nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.encabezado nav a {
+  color: var(--suave);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  font-size: .9rem;
+}
+.encabezado nav a.activo { background: var(--primario); border-color: var(--primario); color: #fff; }
+
+.contenido { max-width: 860px; margin: 0 auto; padding: 16px; }
+
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.tarjeta h2 { margin-top: 0; font-size: 1.2rem; }
+.ayuda { color: var(--suave); margin-top: -4px; }
+
+label { display: block; font-weight: 600; font-size: .9rem; margin: 10px 0 4px; }
+input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--fondo);
+  color: var(--texto);
+  font: inherit;
+}
+input:focus { outline: 2px solid var(--primario); outline-offset: 1px; }
+input.con-error { border-color: var(--error); }
+
+fieldset { border: 1px solid var(--borde); border-radius: 8px; margin: 16px 0; padding: 8px 14px 14px; }
+legend { font-weight: 600; padding: 0 6px; }
+
+.grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
+
+.fila-contacto { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0 12px; align-items: end; }
+
+button {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--primario);
+  background: var(--primario);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: var(--primario-oscuro); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.secundario { background: transparent; color: var(--primario); }
+button.secundario:hover:not(:disabled) { background: var(--codigo); }
+button.quitar { background: transparent; color: var(--error); border-color: var(--borde); padding: 8px 12px; }
+fieldset > button.secundario { margin-top: 6px; }
+
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+.error { color: var(--error); }
+small.error { display: block; margin-top: 2px; }
+.estado .valido { color: var(--ok); }
+.estado .no-valido { color: var(--error); }
+
+.mensaje { padding: 10px 12px; border-radius: 6px; }
+.mensaje.ok { background: var(--ok-fondo); color: var(--ok); }
+.mensaje.error { background: var(--error-fondo); }
+
+.modelo { font-weight: 600; margin-bottom: 4px; }
+pre {
+  background: var(--codigo);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: .85rem;
+  margin-top: 0;
+}
+
+.checks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+label.check { display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { border: 1px solid var(--borde); padding: 8px; text-align: left; vertical-align: top; }
+thead th { background: var(--codigo); }
+
+.indice li { margin-bottom: 6px; }
+a { color: var(--primario); }
+
+@media (max-width: 560px) {
+  .fila-contacto { grid-template-columns: 1fr; }
+  .fila-contacto button.quitar { justify-self: start; margin-top: 8px; }
+}

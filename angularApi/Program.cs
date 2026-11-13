@@ -1,21 +1,29 @@
 using System.Text.Json.Serialization;
 using angularApi.Filtros;
-using dao_library;
 using dao_library.Data;
+using dao_library.EntityFramework;
+using dao_library.Interfaces;
+using dao_library.Mock;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var cadenaConexion = builder.Configuration.GetConnectionString("Escuela")
-    ?? throw new InvalidOperationException("Falta la cadena de conexión 'Escuela' en appsettings.json.");
+// Abstract Factory: acá, y sólo acá, se elige qué familia de DAOs usa toda la API.
+// "AccesoDatos" se cambia en appsettings.json o al ejecutar: dotnet run -- --AccesoDatos=Mock
+var accesoDatos = builder.Configuration["AccesoDatos"] ?? "EF";
 
-builder.Services.AddDbContext<EscuelaDbContext>(options => options.UseSqlServer(cadenaConexion));
-
-builder.Services.AddScoped<AlumnoDAO>();
-builder.Services.AddScoped<DocenteDAO>();
-builder.Services.AddScoped<DivisionDAO>();
-builder.Services.AddScoped<MateriaDAO>();
-builder.Services.AddScoped<CalificacionDAO>();
+if (accesoDatos.Equals("Mock", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton(_ => MockDAOFactory.CrearConDatosDeEjemplo());
+    builder.Services.AddScoped<IDAOFactory, MockDAOFactory>();
+}
+else
+{
+    var cadenaConexion = builder.Configuration.GetConnectionString("Escuela")
+        ?? throw new InvalidOperationException("Falta la cadena de conexión 'Escuela' en appsettings.json.");
+    builder.Services.AddDbContext<EscuelaDbContext>(options => options.UseSqlServer(cadenaConexion));
+    builder.Services.AddScoped<IDAOFactory, EFDAOFactory>();
+}
 
 builder.Services.AddControllers(options => options.Filters.Add<ErroresBaseDeDatosFilter>())
     .AddJsonOptions(options =>

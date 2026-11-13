@@ -1,14 +1,15 @@
 using dao_library.Data;
+using dao_library.Interfaces;
 using entity_library;
 using Microsoft.EntityFrameworkCore;
 
-namespace dao_library;
+namespace dao_library.EntityFramework;
 
-public class CalificacionDAO
+public class EFDAOCalificacion : IDAOCalificacion
 {
     private readonly EscuelaDbContext db;
 
-    public CalificacionDAO(EscuelaDbContext db) => this.db = db;
+    public EFDAOCalificacion(EscuelaDbContext db) => this.db = db;
 
     public Task<List<Calificacion>> ListarAsync(long? alumnoId = null, long? materiaId = null)
     {

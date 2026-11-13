@@ -1,17 +1,15 @@
 using dao_library.Data;
+using dao_library.Interfaces;
 using entity_library;
 using Microsoft.EntityFrameworkCore;
 
-namespace dao_library;
+namespace dao_library.EntityFramework;
 
-public record PromedioMateria(long MateriaId, string Materia, int CantidadNotas, decimal Promedio, bool Aprobada);
-
-public class AlumnoDAO
+public class EFDAOAlumno : IDAOAlumno
 {
-    public const decimal NotaAprobacion = 6m;
     private readonly EscuelaDbContext db;
 
-    public AlumnoDAO(EscuelaDbContext db) => this.db = db;
+    public EFDAOAlumno(EscuelaDbContext db) => this.db = db;
 
     public Task<List<Alumno>> ListarAsync(long? divisionId = null)
     {
@@ -63,19 +61,10 @@ public class AlumnoDAO
 
         var notas = await db.Calificaciones.AsNoTracking()
             .Where(c => c.AlumnoId == id)
-            .Select(c => new { c.MateriaId, Materia = c.Materia!.Nombre, c.Nota })
+            .Select(c => new NotaDeMateria(c.MateriaId, c.Materia!.Nombre, c.Nota))
             .ToListAsync();
 
-        return notas
-            .GroupBy(n => new { n.MateriaId, n.Materia })
-            .Select(g =>
-            {
-                var promedio = Math.Round(g.Average(n => n.Nota), 2);
-                return new PromedioMateria(g.Key.MateriaId, g.Key.Materia, g.Count(), promedio,
-                    promedio >= NotaAprobacion);
-            })
-            .OrderBy(p => p.Materia)
-            .ToList();
+        return PromedioMateria.Calcular(notas);
     }
 
     // El DNI no se puede repetir entre ninguna persona; el legajo, entre alumnos.
