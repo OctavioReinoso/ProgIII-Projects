@@ -15,4 +15,5 @@ public class EFDAOFactory : IDAOFactory
     public IDAODivision CrearDAODivision() => new EFDAODivision(db);
     public IDAOMateria CrearDAOMateria() => new EFDAOMateria(db);
     public IDAOCalificacion CrearDAOCalificacion() => new EFDAOCalificacion(db);
+    public IDAOUsuario CrearDAOUsuario() => new EFDAOUsuario(db);
 }

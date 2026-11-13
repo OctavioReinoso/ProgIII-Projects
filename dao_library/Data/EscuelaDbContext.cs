@@ -13,6 +13,7 @@ public class EscuelaDbContext : DbContext
     public DbSet<Division> Divisiones => Set<Division>();
     public DbSet<Materia> Materias => Set<Materia>();
     public DbSet<Calificacion> Calificaciones => Set<Calificacion>();
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,6 +65,14 @@ public class EscuelaDbContext : DbContext
         {
             materia.Property(m => m.Nombre).HasMaxLength(80);
             materia.HasIndex(m => m.Nombre).IsUnique();
+        });
+
+        modelBuilder.Entity<Usuario>(usuario =>
+        {
+            usuario.Property(u => u.Email).HasMaxLength(254);
+            usuario.Property(u => u.EmailNormalizado).HasMaxLength(254);
+            usuario.Property(u => u.PasswordHash).HasMaxLength(60);
+            usuario.HasIndex(u => u.EmailNormalizado).IsUnique();
         });
 
         modelBuilder.Entity<Calificacion>(calificacion =>

@@ -1,0 +1,53 @@
+<section class="tarjeta tarjeta-login">
+  <div class="pestanias" role="tablist" aria-label="Tipo de acceso">
+    <button type="button" role="tab" [class.activa]="modo() === 'ingresar'" [attr.aria-selected]="modo() === 'ingresar'"
+            (click)="cambiarModo('ingresar')">Ingresar</button>
+    <button type="button" role="tab" [class.activa]="modo() === 'crear'" [attr.aria-selected]="modo() === 'crear'"
+            (click)="cambiarModo('crear')">Crear cuenta</button>
+  </div>
+
+  <h2>{{ modo() === 'ingresar' ? 'Ingresar al panel' : 'Crear una cuenta' }}</h2>
+  <p class="ayuda">
+    {{ modo() === 'ingresar'
+      ? 'Con tu sesión podés cargar, modificar y borrar datos. Para consultar no hace falta.'
+      : 'La contraseña se guarda cifrada con BCrypt; nadie puede leerla.' }}
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" [attr.aria-busy]="ocupado()" novalidate>
+    <label for="l-email">Email</label>
+    <input id="l-email" type="email" autocomplete="username" formControlName="email"
+           [class.con-error]="form.controls.email.touched && form.controls.email.invalid" />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <small class="error">Ingresá un email válido.</small>
+    }
+
+    <label for="l-password">Contraseña</label>
+    <input id="l-password" type="password" formControlName="password"
+           [attr.autocomplete]="modo() === 'crear' ? 'new-password' : 'current-password'"
+           [class.con-error]="form.controls.password.touched && form.controls.password.invalid" />
+    @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+      <small class="error">Mínimo 8 caracteres.</small>
+    } @else if (form.controls.password.touched && form.controls.password.invalid) {
+      <small class="error">Ingresá tu contraseña.</small>
+    }
+
+    @if (modo() === 'crear') {
+      <label for="l-confirmacion">Repetí la contraseña</label>
+      <input id="l-confirmacion" type="password" autocomplete="new-password" formControlName="confirmacion"
+             [class.con-error]="form.controls.confirmacion.touched && form.hasError('noCoinciden')" />
+      @if (form.controls.confirmacion.touched && form.hasError('noCoinciden')) {
+        <small class="error">Las contraseñas no coinciden.</small>
+      }
+    }
+
+    @if (error(); as mensaje) {
+      <p class="mensaje error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="acciones">
+      <button type="submit" [disabled]="ocupado()">
+        {{ ocupado() ? 'Un momento...' : modo() === 'ingresar' ? 'Ingresar' : 'Crear cuenta e ingresar' }}
+      </button>
+    </div>
+  </form>
+</section>

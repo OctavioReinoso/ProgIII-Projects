@@ -49,15 +49,16 @@ public class MockDAODocente : IDAODocente
         }
     }
 
-    public Task<bool> EliminarAsync(long id)
+    public Task<Resultado> EliminarAsync(long id)
     {
         lock (db.Sync)
         {
             var docente = db.Docentes.FirstOrDefault(d => d.Id == id);
-            if (docente is null) return Task.FromResult(false);
+            if (docente is null) return Task.FromResult(Resultado.NoEncontrado);
+            if (docente.Materias.Any(m => m.Docentes.Count == 1)) return Task.FromResult(Resultado.MinimoRequerido);
             foreach (var materia in docente.Materias) materia.Docentes.Remove(docente);
             db.Docentes.Remove(docente);
-            return Task.FromResult(true);
+            return Task.FromResult(Resultado.Ok);
         }
     }
 

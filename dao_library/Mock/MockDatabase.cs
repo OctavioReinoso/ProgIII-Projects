@@ -14,14 +14,16 @@ public class MockDatabase
     public List<Division> Divisiones { get; } = new();
     public List<Materia> Materias { get; } = new();
     public List<Calificacion> Calificaciones { get; } = new();
+    public List<Usuario> Usuarios { get; } = new();
 
     // Alumnos y docentes comparten la secuencia de Id, igual que en la tabla Personas.
-    private long ultimoIdPersona, ultimoIdDivision, ultimoIdMateria, ultimoIdCalificacion;
+    private long ultimoIdPersona, ultimoIdDivision, ultimoIdMateria, ultimoIdCalificacion, ultimoIdUsuario;
 
     public long SiguienteIdPersona() => ++ultimoIdPersona;
     public long SiguienteIdDivision() => ++ultimoIdDivision;
     public long SiguienteIdMateria() => ++ultimoIdMateria;
     public long SiguienteIdCalificacion() => ++ultimoIdCalificacion;
+    public long SiguienteIdUsuario() => ++ultimoIdUsuario;
 
     public IEnumerable<Persona> Personas => Alumnos.Cast<Persona>().Concat(Docentes);
 }

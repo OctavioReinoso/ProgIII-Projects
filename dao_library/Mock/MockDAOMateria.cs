@@ -19,12 +19,22 @@ public class MockDAOMateria : IDAOMateria
         lock (db.Sync) return Task.FromResult(db.Materias.FirstOrDefault(m => m.Id == id));
     }
 
-    public Task<Resultado> CrearAsync(Materia materia)
+    public Task<Resultado> CrearAsync(Materia materia, IReadOnlyCollection<long> docenteIds)
     {
+        var ids = docenteIds.Distinct().ToList();
+        if (ids.Count == 0) return Task.FromResult(Resultado.MinimoRequerido);
         lock (db.Sync)
         {
+            var docentes = db.Docentes.Where(d => ids.Contains(d.Id)).ToList();
+            if (docentes.Count != ids.Count) return Task.FromResult(Resultado.NoEncontrado);
             if (NombreEnUso(materia.Nombre, null)) return Task.FromResult(Resultado.Duplicado);
+
             materia.Id = db.SiguienteIdMateria();
+            foreach (var docente in docentes)
+            {
+                materia.Docentes.Add(docente);
+                docente.Materias.Add(materia);
+            }
             db.Materias.Add(materia);
             return Task.FromResult(Resultado.Ok);
         }
@@ -86,6 +96,8 @@ public class MockDAOMateria : IDAOMateria
             var materia = db.Materias.FirstOrDefault(m => m.Id == id);
             var docente = db.Docentes.FirstOrDefault(d => d.Id == docenteId);
             if (materia is null || docente is null) return Task.FromResult(Resultado.NoEncontrado);
+            if (!materia.Docentes.Contains(docente)) return Task.FromResult(Resultado.Ok);
+            if (materia.Docentes.Count <= 1) return Task.FromResult(Resultado.MinimoRequerido);
             materia.Docentes.Remove(docente);
             docente.Materias.Remove(materia);
             return Task.FromResult(Resultado.Ok);

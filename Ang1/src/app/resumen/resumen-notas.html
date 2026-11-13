@@ -1,0 +1,88 @@
+<section class="tarjeta">
+  <h2>Resumen de notas (signals)</h2>
+  <p class="ayuda">
+    Las notas reales vienen de la API. Podés sumar notas <strong>simuladas</strong> para ver cómo cambian los promedios:
+    los totales son <code>computed()</code> y se recalculan solos; las simulaciones se guardan con un <code>effect()</code>.
+  </p>
+
+  @if (error(); as mensaje) {
+    <p class="mensaje error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="kpis">
+    <div><strong>{{ filtradas().length }}</strong><span>notas</span></div>
+    <div><strong>{{ promedioGeneral() ?? '—' }}</strong><span>promedio general</span></div>
+    <div><strong>{{ aprobados() }} / {{ promedios().length }}</strong><span>alumnos aprobados</span></div>
+    <div><strong>{{ porcentajeAprobados() }}%</strong><span>aprobación</span></div>
+  </div>
+
+  <label for="r-materia">Materia</label>
+  <select id="r-materia" [ngModel]="materiaElegida()" (ngModelChange)="materiaElegida.set($event)">
+    <option value="todas">Todas las materias</option>
+    @for (materia of materias(); track materia) {
+      <option [value]="materia">{{ materia }}</option>
+    }
+  </select>
+
+  @if (cargando()) {
+    <p class="ayuda">Cargando notas...</p>
+  } @else {
+    <div class="tabla-scroll">
+      <table>
+        <thead><tr><th>Alumno</th><th>Notas</th><th>Promedio</th><th>Estado</th></tr></thead>
+        <tbody>
+          @for (p of promedios(); track p.alumno) {
+            <tr>
+              <td>{{ p.alumno }}</td>
+              <td>{{ p.cantidad }}</td>
+              <td>{{ p.promedio }}</td>
+              <td><span class="estado-nota" [class.valido]="p.aprobado" [class.no-valido]="!p.aprobado">{{ p.aprobado ? 'Aprobado' : 'Desaprobado' }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="vacio">No hay notas para mostrar.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="tarjeta">
+  <h2>Simular una nota</h2>
+  <p class="ayuda">No se guarda en la API: sólo en este navegador.</p>
+  <form class="grilla" (ngSubmit)="simularNota()">
+    <div>
+      <label for="s-alumno">Alumno</label>
+      <input id="s-alumno" name="alumno" type="text" list="lista-alumnos" required [(ngModel)]="nuevaAlumno" />
+      <datalist id="lista-alumnos">
+        @for (alumno of alumnos(); track alumno) { <option [value]="alumno"></option> }
+      </datalist>
+    </div>
+    <div>
+      <label for="s-materia">Materia</label>
+      <input id="s-materia" name="materia" type="text" list="lista-materias" required [(ngModel)]="nuevaMateria" />
+      <datalist id="lista-materias">
+        @for (materia of materias(); track materia) { <option [value]="materia"></option> }
+      </datalist>
+    </div>
+    <div>
+      <label for="s-nota">Nota (1 a 10)</label>
+      <input id="s-nota" name="nota" type="number" min="1" max="10" step="0.5" required [(ngModel)]="nuevaNota" />
+    </div>
+    <div class="acciones">
+      <button type="submit">Agregar simulación</button>
+    </div>
+  </form>
+
+  @if (simuladas().length) {
+    <ul class="chips">
+      @for (n of simuladas(); track n.id) {
+        <li>
+          {{ n.alumno }} · {{ n.materia }}: <strong>{{ n.nota }}</strong>
+          <button type="button" class="quitar" (click)="quitarSimulada(n.id)" [attr.aria-label]="'Quitar simulación de ' + n.alumno">✕</button>
+        </li>
+      }
+    </ul>
+    <button type="button" class="secundario" (click)="borrarSimulaciones()">Borrar todas las simulaciones</button>
+  }
+</section>

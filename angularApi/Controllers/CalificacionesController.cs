@@ -1,6 +1,7 @@
 using angularApi.Dtos;
 using dao_library;
 using dao_library.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
@@ -13,10 +14,12 @@ public class CalificacionesController : EscuelaControllerBase
     public CalificacionesController(IDAOFactory fabrica) => calificacionDAO = fabrica.CrearDAOCalificacion();
 
     // GET /Calificaciones?alumnoId=1&materiaId=2 (los dos filtros son opcionales)
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<CalificacionResponse>>> Listar([FromQuery] long? alumnoId, [FromQuery] long? materiaId) =>
         (await calificacionDAO.ListarAsync(alumnoId, materiaId)).Select(c => c.AResponse()).ToList();
 
+    [AllowAnonymous]
     [HttpGet("{id:long}")]
     public async Task<ActionResult<CalificacionResponse>> Buscar(long id) =>
         await calificacionDAO.BuscarAsync(id) is { } calificacion ? calificacion.AResponse() : NotFound();

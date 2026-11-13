@@ -1,6 +1,7 @@
 using angularApi.Dtos;
 using dao_library;
 using dao_library.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
@@ -12,19 +13,22 @@ public class MateriasController : EscuelaControllerBase
     // La fábrica llega por constructor: el controlador no sabe si los datos vienen de EF o del Mock.
     public MateriasController(IDAOFactory fabrica) => materiaDAO = fabrica.CrearDAOMateria();
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<MateriaResponse>>> Listar() =>
         (await materiaDAO.ListarAsync()).Select(m => m.AResponse()).ToList();
 
+    [AllowAnonymous]
     [HttpGet("{id:long}")]
     public async Task<ActionResult<MateriaResponse>> Buscar(long id) =>
         await materiaDAO.BuscarAsync(id) is { } materia ? materia.AResponse() : NotFound();
 
     [HttpPost]
-    public async Task<IActionResult> Crear(MateriaRequest request)
+    public async Task<IActionResult> Crear(CrearMateriaRequest request)
     {
         var materia = request.AEntidad();
-        var resultado = await materiaDAO.CrearAsync(materia);
+        var resultado = await materiaDAO.CrearAsync(materia, request.DocenteIds);
+        if (resultado == Resultado.NoEncontrado) return Problema(StatusCodes.Status404NotFound, "Uno o más docentes no existen.");
         if (resultado != Resultado.Ok) return Responder(resultado, "una materia");
         return CreatedAtAction(nameof(Buscar), new { id = materia.Id }, materia.AResponse());
     }

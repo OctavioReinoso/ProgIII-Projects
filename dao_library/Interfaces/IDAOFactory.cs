@@ -9,4 +9,5 @@ public interface IDAOFactory
     IDAODivision CrearDAODivision();
     IDAOMateria CrearDAOMateria();
     IDAOCalificacion CrearDAOCalificacion();
+    IDAOUsuario CrearDAOUsuario();
 }

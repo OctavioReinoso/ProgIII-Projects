@@ -1,0 +1,145 @@
+<div class="panel">
+  <nav class="panel-menu" aria-label="Secciones del panel">
+    @for (item of secciones; track item.recurso) {
+      <button type="button" [class.activo]="seccion().recurso === item.recurso"
+              [attr.aria-current]="seccion().recurso === item.recurso ? 'page' : null"
+              (click)="elegirSeccion(item)">{{ item.titulo }}</button>
+    }
+  </nav>
+
+  <section class="tarjeta panel-contenido">
+    <div class="panel-encabezado">
+      <div>
+        <h2>{{ seccion().titulo }}</h2>
+        <p class="ayuda">{{ seccion().descripcion }}</p>
+      </div>
+      <button type="button" (click)="nuevo()">+ Nuevo/a {{ seccion().singular }}</button>
+    </div>
+
+    @if (error(); as mensaje) {
+      <p class="mensaje error" role="alert">{{ mensaje }}</p>
+    }
+    @if (exito(); as mensaje) {
+      <p class="mensaje ok" role="status">{{ mensaje }}</p>
+    }
+
+    @if (formulario(); as form) {
+      <form class="panel-formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <h3>{{ editandoId() === null ? 'Nuevo/a ' + seccion().singular : 'Modificar ' + seccion().singular }}</h3>
+        <div class="grilla">
+          @for (campo of camposVisibles(); track campo.clave) {
+            <div [class.campo-ancho]="campo.tipo === 'varios'">
+              <label [for]="'p-' + campo.clave">{{ campo.etiqueta }}</label>
+              @switch (campo.tipo) {
+                @case ('numero') {
+                  <input [id]="'p-' + campo.clave" type="number" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)" />
+                }
+                @case ('fecha') {
+                  <input [id]="'p-' + campo.clave" type="date" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)" />
+                }
+                @case ('email') {
+                  <input [id]="'p-' + campo.clave" type="email" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)" />
+                }
+                @case ('opciones') {
+                  <select [id]="'p-' + campo.clave" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)">
+                    <option [ngValue]="null" disabled>Elegí una opción</option>
+                    @for (opcion of opcionesDe(campo); track opcion.valor) {
+                      <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    }
+                  </select>
+                }
+                @case ('varios') {
+                  <select [id]="'p-' + campo.clave" multiple size="4" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)">
+                    @for (opcion of opcionesDe(campo); track opcion.valor) {
+                      <option [ngValue]="opcion.valor">{{ opcion.texto }}</option>
+                    } @empty {
+                      <option disabled>Primero cargá un docente en la sección Docentes.</option>
+                    }
+                  </select>
+                }
+                @default {
+                  <input [id]="'p-' + campo.clave" type="text" [formControlName]="campo.clave" [class.con-error]="invalido(campo.clave)" />
+                }
+              }
+              @if (invalido(campo.clave)) {
+                <small class="error">{{ campo.error }}</small>
+              } @else if (campo.ayuda) {
+                <small class="ayuda">{{ campo.ayuda }}</small>
+              }
+            </div>
+          }
+        </div>
+        <div class="acciones">
+          <button type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button>
+          <button type="button" class="secundario" (click)="cerrarFormulario()">Cancelar</button>
+        </div>
+      </form>
+    }
+
+    @if (relacionDe(); as registro) {
+      <div class="panel-formulario">
+        <h3>{{ seccion().relacion?.titulo }}: {{ seccion().columnas[0].valor(registro) }}</h3>
+        <ul class="chips">
+          @for (miembro of miembros(); track miembro.valor) {
+            <li>
+              {{ miembro.texto }}
+              <button type="button" class="quitar" (click)="quitarMiembro(miembro.valor)" [attr.aria-label]="'Quitar a ' + miembro.texto">✕</button>
+            </li>
+          } @empty {
+            <li class="vacio">Todavía no hay nadie.</li>
+          }
+        </ul>
+        <div class="fila-agregar">
+          <select [(ngModel)]="relacionNuevo" [ngModelOptions]="{ standalone: true }" aria-label="Elegí a quién agregar">
+            <option [ngValue]="null" disabled>{{ candidatos().length ? 'Elegí a quién agregar' : 'No hay candidatos disponibles' }}</option>
+            @for (candidato of candidatos(); track candidato.valor) {
+              <option [ngValue]="candidato.valor">{{ candidato.texto }}</option>
+            }
+          </select>
+          <button type="button" (click)="agregarMiembro()" [disabled]="relacionNuevo === null">Agregar</button>
+          <button type="button" class="secundario" (click)="relacionDe.set(null)">Cerrar</button>
+        </div>
+      </div>
+    }
+
+    <input class="buscador" type="search" placeholder="Buscar..." aria-label="Buscar en la tabla"
+           [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" />
+
+    @if (cargando()) {
+      <p class="ayuda">Cargando...</p>
+    } @else {
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              @for (columna of seccion().columnas; track columna.titulo) {
+                <th>{{ columna.titulo }}</th>
+              }
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (registro of filtrados(); track registro.id) {
+              <tr>
+                @for (columna of seccion().columnas; track columna.titulo) {
+                  <td>{{ columna.valor(registro) }}</td>
+                }
+                <td class="acciones-fila">
+                  @if (seccion().relacion) {
+                    <button type="button" class="secundario" (click)="gestionarRelacion(registro)">{{ seccion().relacion?.recurso === 'alumnos' ? 'Alumnos' : 'Docentes' }}</button>
+                  }
+                  <button type="button" class="secundario" (click)="editar(registro)">Editar</button>
+                  <button type="button" class="quitar" (click)="eliminar(registro)">Borrar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td [attr.colspan]="seccion().columnas.length + 1" class="vacio">
+                {{ busqueda() ? 'Nada coincide con la búsqueda.' : 'Todavía no hay registros.' }}
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

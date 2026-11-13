@@ -1,6 +1,7 @@
 using angularApi.Dtos;
 using dao_library;
 using dao_library.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
@@ -12,10 +13,12 @@ public class DocentesController : EscuelaControllerBase
     // La fábrica llega por constructor: el controlador no sabe si los datos vienen de EF o del Mock.
     public DocentesController(IDAOFactory fabrica) => docenteDAO = fabrica.CrearDAODocente();
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<DocenteResponse>>> Listar() =>
         (await docenteDAO.ListarAsync()).Select(d => d.AResponse()).ToList();
 
+    [AllowAnonymous]
     [HttpGet("{id:long}")]
     public async Task<ActionResult<DocenteResponse>> Buscar(long id) =>
         await docenteDAO.BuscarAsync(id) is { } docente ? docente.AResponse() : NotFound();
@@ -35,5 +38,5 @@ public class DocentesController : EscuelaControllerBase
 
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> Eliminar(long id) =>
-        await docenteDAO.EliminarAsync(id) ? NoContent() : NotFound();
+        Responder(await docenteDAO.EliminarAsync(id), "El docente");
 }

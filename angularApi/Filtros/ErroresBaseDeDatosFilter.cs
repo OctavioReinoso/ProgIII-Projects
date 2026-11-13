@@ -10,23 +10,28 @@ namespace angularApi.Filtros;
 public sealed class ErroresBaseDeDatosFilter : IExceptionFilter
 {
     // 2601 y 2627: clave duplicada. 547: violación de FK.
-    private static readonly int[] CodigosConflicto = [2601, 2627, 547];
+    // 1205: dos transacciones serializables se bloquearon entre sí y SQL Server canceló una.
+    private static readonly int[] CodigosConflicto = [2601, 2627, 547, 1205];
     private readonly ILogger<ErroresBaseDeDatosFilter> logger;
 
     public ErroresBaseDeDatosFilter(ILogger<ErroresBaseDeDatosFilter> logger) => this.logger = logger;
 
     public void OnException(ExceptionContext context)
     {
-        if (context.Exception is not DbUpdateException { InnerException: SqlException sql } ||
-            !CodigosConflicto.Contains(sql.Number))
-            return;
+        var sql = context.Exception switch
+        {
+            DbUpdateException { InnerException: SqlException interna } => interna,
+            SqlException directa => directa, // ExecuteUpdate/transacciones la lanzan sin envolver
+            _ => null
+        };
+        if (sql is null || !CodigosConflicto.Contains(sql.Number)) return;
 
         logger.LogWarning(context.Exception, "Conflicto al guardar en la base de datos.");
         context.Result = new ConflictObjectResult(new ProblemDetails
         {
             Status = StatusCodes.Status409Conflict,
             Title = "No se pudieron guardar los cambios.",
-            Detail = "Los datos están duplicados o hacen referencia a un registro que ya no existe."
+            Detail = "Los datos están duplicados, hacen referencia a un registro que ya no existe o chocaron con otra operación simultánea. Volvé a intentarlo."
         });
         context.ExceptionHandled = true;
     }

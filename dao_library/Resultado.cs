@@ -7,5 +7,6 @@ public enum Resultado
     NoEncontrado,
     Duplicado,
     YaAsignado,
-    CupoCompleto
+    CupoCompleto,
+    MinimoRequerido
 }

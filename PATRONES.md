@@ -112,23 +112,23 @@ Con un `switch`, cada formato nuevo obliga a modificar el mismo método: viola e
 
 ## 5. Abstract Factory: acceso a datos
 
-Se aplicó sobre la API de la escuela. Como el dominio no tiene "User", la consigna se tradujo así:
+Se aplicó sobre la API de la escuela. La familia tiene un DAO por entidad, incluido el de las cuentas de usuario del login:
 
 | Consigna | Implementación |
 |---|---|
-| `DAOUser` | `IDAOAlumno`, más `IDAODocente`, `IDAODivision`, `IDAOMateria` e `IDAOCalificacion` (`dao_library/Interfaces/IDAOs.cs`) |
+| `DAOUser` | `IDAOUsuario`, más `IDAOAlumno`, `IDAODocente`, `IDAODivision`, `IDAOMateria` e `IDAOCalificacion` (`dao_library/Interfaces/IDAOs.cs`) |
 | `DAOFactory` | `IDAOFactory` (`dao_library/Interfaces/IDAOFactory.cs`) |
 | `EFDAOFactory` | `dao_library/EntityFramework/EFDAOFactory.cs` |
 | `MockDAOFactory` | `dao_library/Mock/MockDAOFactory.cs` |
-| `EFDAOUser` | `EFDAOAlumno`, más un EFDAO por cada entidad |
-| `MockDAOUser` | `MockDAOAlumno`, más un MockDAO por cada entidad, sobre `MockDatabase` |
+| `EFDAOUser` | `EFDAOUsuario`, más un EFDAO por cada entidad |
+| `MockDAOUser` | `MockDAOUsuario`, más un MockDAO por cada entidad, sobre `MockDatabase` |
 
-- [x] Interfaces de los DAO.
+- [x] Interfaz `IDAOUsuario` (el `DAOUser`) y las de las demás entidades.
 - [x] Interfaz `IDAOFactory` con un método `Crear...` por cada DAO.
 - [x] `EFDAOFactory` y `MockDAOFactory` implementan `IDAOFactory`.
-- [x] `EFDAO*` y `MockDAO*` implementan las interfaces.
+- [x] `EFDAOUsuario` y `MockDAOUsuario` (y el resto de los `EFDAO*` y `MockDAO*`) implementan las interfaces.
 - [x] La fábrica se registra en `Program.cs` según la configuración `AccesoDatos` (`EF` o `Mock`), y los controladores la reciben por constructor.
-- [x] Las dos familias se prueban sin modificar `IDAOFactory`: las 28 pruebas de la API corren dos veces, una con EF y otra con Mock (`angularApi.Tests/PruebasPorFamilia.cs`).
+- [x] Las dos familias se prueban sin modificar `IDAOFactory`: todas las pruebas de la API (incluidas las de login) corren dos veces, una con EF y otra con Mock (`angularApi.Tests/PruebasPorFamilia.cs`).
 
 Para cambiar de base sin tocar código:
 
@@ -137,7 +137,7 @@ dotnet run --project angularApi -- --AccesoDatos=Mock   # en memoria, con datos 
 dotnet run --project angularApi                          # EF + SQL Server (valor de appsettings.json)
 ```
 
-Las dos familias aplican las mismas reglas: DNI y legajo únicos, cupo de la división, un alumno en una sola división, y cascadas al borrar. En EF las cascadas las hace la base; en Mock se hacen a mano, actualizando los dos lados de cada relación. El cálculo del boletín (`PromedioMateria.Calcular`) es compartido por ambas.
+Las dos familias aplican las mismas reglas: DNI, legajo y email únicos, cupo de la división, un alumno en una sola división, al menos un docente por materia, y cascadas al borrar. En EF las cascadas las hace la base; en Mock se hacen a mano, actualizando los dos lados de cada relación. El cálculo del boletín (`PromedioMateria.Calcular`) es compartido por ambas.
 
 **1. ¿Por qué `DAOFactory` no debería crear directamente `EFDAOUser`?**
 Porque `IDAOFactory` es la abstracción. Si creara `EFDAOAlumno`, quedaría atada a Entity Framework y no podría existir otra familia. La interfaz sólo declara *qué* se crea; cada fábrica concreta decide *cómo*. Gracias a eso la API depende de la interfaz y no de EF.
@@ -152,9 +152,9 @@ Los exportadores tienen su propia jerarquía (el Factory Method del ejercicio 4)
 
 **3. ¿Qué clases habría que modificar si además incorporamos acceso por SQL directo?**
 Casi ninguna: el cambio es agregar, no modificar.
-- **Nuevas:** `SqlDAOFactory : IDAOFactory` y una clase por DAO (`SqlDAOAlumno`, `SqlDAODocente`, `SqlDAODivision`, `SqlDAOMateria` y `SqlDAOCalificacion`) usando ADO.NET (`SqlConnection`/`SqlCommand`).
+- **Nuevas:** `SqlDAOFactory : IDAOFactory` y una clase por DAO (`SqlDAOUsuario`, `SqlDAOAlumno`, `SqlDAODocente`, `SqlDAODivision`, `SqlDAOMateria` y `SqlDAOCalificacion`) usando ADO.NET (`SqlConnection`/`SqlCommand`).
 - **A modificar:** sólo `Program.cs`, para agregar la opción `AccesoDatos = "Sql"`.
-- **Sin cambios:** las interfaces, los controladores y las familias EF y Mock.
+- **Sin cambios:** las interfaces, los controladores (incluido el login) y las familias EF y Mock.
 
 **4. ¿Qué ventaja obtenemos al pasar la fábrica por el constructor?**
 - El controlador no sabe ni le importa qué familia usa, así que está desacoplado.

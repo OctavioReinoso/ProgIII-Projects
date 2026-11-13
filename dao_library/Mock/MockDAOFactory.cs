@@ -16,6 +16,7 @@ public class MockDAOFactory : IDAOFactory
     public IDAODivision CrearDAODivision() => new MockDAODivision(db);
     public IDAOMateria CrearDAOMateria() => new MockDAOMateria(db);
     public IDAOCalificacion CrearDAOCalificacion() => new MockDAOCalificacion(db);
+    public IDAOUsuario CrearDAOUsuario() => new MockDAOUsuario(db);
 
     // Datos de ejemplo para probar la API sin SQL Server. Se cargan usando la propia fábrica.
     public static MockDatabase CrearConDatosDeEjemplo()
@@ -27,6 +28,7 @@ public class MockDAOFactory : IDAOFactory
         var lucia = new Alumno { Nombre = "Lucía", Apellido = "Fernández", Dni = "47123456", FechaNacimiento = new DateOnly(2010, 4, 12), Legajo = "A-001" };
         var tomas = new Alumno { Nombre = "Tomás", Apellido = "Gómez", Dni = "46222333", FechaNacimiento = new DateOnly(2010, 8, 3), Legajo = "A-002" };
         var jorge = new Docente { Nombre = "Jorge", Apellido = "Benítez", Dni = "30123456", FechaNacimiento = new DateOnly(1980, 9, 1), Titulo = "Profesor de Matemática" };
+        var laura = new Docente { Nombre = "Laura", Apellido = "Ríos", Dni = "28111222", FechaNacimiento = new DateOnly(1979, 5, 20), Titulo = "Profesora de Lengua" };
         var matematica = new Materia { Nombre = "Matemática", HorasSemanales = 5 };
         var lengua = new Materia { Nombre = "Lengua", HorasSemanales = 4 };
 
@@ -34,11 +36,12 @@ public class MockDAOFactory : IDAOFactory
         fabrica.CrearDAOAlumno().CrearAsync(lucia).Wait();
         fabrica.CrearDAOAlumno().CrearAsync(tomas).Wait();
         fabrica.CrearDAODocente().CrearAsync(jorge).Wait();
-        fabrica.CrearDAOMateria().CrearAsync(matematica).Wait();
-        fabrica.CrearDAOMateria().CrearAsync(lengua).Wait();
+        fabrica.CrearDAODocente().CrearAsync(laura).Wait();
+        // Cada materia nace con al menos un docente.
+        fabrica.CrearDAOMateria().CrearAsync(matematica, [jorge.Id]).Wait();
+        fabrica.CrearDAOMateria().CrearAsync(lengua, [laura.Id]).Wait();
         fabrica.CrearDAODivision().InscribirAlumnoAsync(division.Id, lucia.Id).Wait();
         fabrica.CrearDAODivision().InscribirAlumnoAsync(division.Id, tomas.Id).Wait();
-        fabrica.CrearDAOMateria().AsignarDocenteAsync(matematica.Id, jorge.Id).Wait();
 
         var notas = fabrica.CrearDAOCalificacion();
         notas.CrearAsync(new Calificacion { AlumnoId = lucia.Id, MateriaId = matematica.Id, Nota = 8, Fecha = new DateOnly(2026, 6, 10), Tipo = TipoEvaluacion.Escrita }).Wait();

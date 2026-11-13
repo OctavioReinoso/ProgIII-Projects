@@ -1,6 +1,7 @@
 using angularApi.Dtos;
 using dao_library;
 using dao_library.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace angularApi.Controllers;
@@ -13,10 +14,12 @@ public class AlumnosController : EscuelaControllerBase
     public AlumnosController(IDAOFactory fabrica) => alumnoDAO = fabrica.CrearDAOAlumno();
 
     // GET /Alumnos?divisionId=1
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<AlumnoResponse>>> Listar([FromQuery] long? divisionId) =>
         (await alumnoDAO.ListarAsync(divisionId)).Select(a => a.AResponse()).ToList();
 
+    [AllowAnonymous]
     [HttpGet("{id:long}")]
     public async Task<ActionResult<AlumnoResponse>> Buscar(long id) =>
         await alumnoDAO.BuscarAsync(id) is { } alumno ? alumno.AResponse() : NotFound();
@@ -39,6 +42,7 @@ public class AlumnosController : EscuelaControllerBase
         await alumnoDAO.EliminarAsync(id) ? NoContent() : NotFound();
 
     // Promedio por materia y promedio general del alumno.
+    [AllowAnonymous]
     [HttpGet("{id:long}/boletin")]
     public async Task<ActionResult<BoletinResponse>> Boletin(long id)
     {

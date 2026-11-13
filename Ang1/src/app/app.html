@@ -1,8 +1,22 @@
 <header class="encabezado">
-  <h1>Escuela - Angular Forms</h1>
-  <nav>
-    @for (enlace of enlaces; track enlace.ruta) {
-      <a [routerLink]="enlace.ruta" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">{{ enlace.texto }}</a>
+  <div class="encabezado-fila">
+    <h1><a routerLink="/">Escuela - Angular</a></h1>
+    <div class="sesion">
+      @if (sesion.email(); as email) {
+        <span class="sesion-email">{{ email }}</span>
+        <button type="button" class="secundario" (click)="salir()">Cerrar sesión</button>
+      } @else {
+        <a class="boton-enlace" routerLink="/ingresar">Ingresar</a>
+      }
+    </div>
+  </div>
+  <nav aria-label="Secciones">
+    @for (enlace of gestion; track enlace.ruta) {
+      <a [routerLink]="enlace.ruta" routerLinkActive="activo">{{ enlace.texto }}</a>
+    }
+    <span class="separador" aria-hidden="true"></span>
+    @for (enlace of formularios; track enlace.ruta) {
+      <a [routerLink]="enlace.ruta" routerLinkActive="activo">{{ enlace.texto }}</a>
     }
   </nav>
 </header>

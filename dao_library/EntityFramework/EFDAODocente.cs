@@ -1,3 +1,4 @@
+using System.Data;
 using dao_library.Data;
 using dao_library.Interfaces;
 using entity_library;
@@ -42,13 +43,21 @@ public class EFDAODocente : IDAODocente
         return Resultado.Ok;
     }
 
-    public async Task<bool> EliminarAsync(long id)
+    public async Task<Resultado> EliminarAsync(long id)
     {
+        await using var transaccion = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         var docente = await db.Docentes.FindAsync(id);
-        if (docente is null) return false;
+        if (docente is null) return Resultado.NoEncontrado;
+
+        // No se puede borrar si es el único docente de alguna materia: primero hay que asignarle un reemplazo.
+        var dejaMateriaSinDocente = await db.Materias.AnyAsync(m =>
+            m.Docentes.Any(d => d.Id == id) && m.Docentes.Count == 1);
+        if (dejaMateriaSinDocente) return Resultado.MinimoRequerido;
+
         db.Docentes.Remove(docente);
         await db.SaveChangesAsync();
-        return true;
+        await transaccion.CommitAsync();
+        return Resultado.Ok;
     }
 
     private Task<bool> DniEnUsoAsync(string dni, long? idActual) =>

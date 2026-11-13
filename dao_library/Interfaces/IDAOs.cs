@@ -21,7 +21,8 @@ public interface IDAODocente
     Task<Docente?> BuscarAsync(long id);
     Task<Resultado> CrearAsync(Docente docente);
     Task<Resultado> ModificarAsync(long id, Docente datos);
-    Task<bool> EliminarAsync(long id);
+    // MinimoRequerido si es el único docente de alguna materia.
+    Task<Resultado> EliminarAsync(long id);
 }
 
 public interface IDAODivision
@@ -39,10 +40,12 @@ public interface IDAOMateria
 {
     Task<List<Materia>> ListarAsync();
     Task<Materia?> BuscarAsync(long id);
-    Task<Resultado> CrearAsync(Materia materia);
+    // Una materia se crea con al menos un docente que ya exista.
+    Task<Resultado> CrearAsync(Materia materia, IReadOnlyCollection<long> docenteIds);
     Task<Resultado> ModificarAsync(long id, Materia datos);
     Task<bool> EliminarAsync(long id);
     Task<Resultado> AsignarDocenteAsync(long id, long docenteId);
+    // MinimoRequerido si es el último docente de la materia.
     Task<Resultado> QuitarDocenteAsync(long id, long docenteId);
 }
 
@@ -53,4 +56,17 @@ public interface IDAOCalificacion
     Task<Resultado> CrearAsync(Calificacion calificacion);
     Task<Resultado> ModificarAsync(long id, Calificacion datos);
     Task<bool> EliminarAsync(long id);
+}
+
+// El "DAOUser" de la consigna de Abstract Factory.
+public interface IDAOUsuario
+{
+    Task<Usuario?> BuscarAsync(long id);
+    Task<Usuario?> BuscarPorEmailAsync(string email);
+    // Devuelve null si el email ya está registrado.
+    Task<Usuario?> CrearAsync(string email, string passwordHash);
+    // Sólo modifica/elimina si el hash sigue siendo el que se verificó: si otra operación
+    // cambió la contraseña o borró la cuenta en el medio, devuelve false.
+    Task<bool> ModificarAsync(long id, string email, string hashVerificado, string? hashNuevo);
+    Task<bool> EliminarAsync(long id, string hashVerificado);
 }

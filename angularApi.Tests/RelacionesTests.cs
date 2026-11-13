@@ -108,8 +108,9 @@ public abstract class RelacionesTests : PruebasApi
 
         var docente = await cliente.GetFromJsonAsync<JsonElement>($"/Docentes/{docenteId}", Json);
         Assert.Equal(2, docente.GetProperty("materias").GetArrayLength());
+        // Física nació con su propio docente y ahora tiene uno más.
         var materia = await cliente.GetFromJsonAsync<JsonElement>($"/Materias/{fisica}", Json);
-        Assert.Equal(1, materia.GetProperty("docentes").GetArrayLength());
+        Assert.Equal(2, materia.GetProperty("docentes").GetArrayLength());
 
         Assert.Equal(HttpStatusCode.NoContent, (await cliente.DeleteAsync($"/Materias/{fisica}/docentes/{docenteId}")).StatusCode);
         docente = await cliente.GetFromJsonAsync<JsonElement>($"/Docentes/{docenteId}", Json);

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_URL } from '../../api';
 
 // Lo que espera POST /Alumnos en la API (angularApi).
 export interface AlumnoRequest {
@@ -17,7 +18,7 @@ export interface AlumnoResponse extends AlumnoRequest {
 
 @Injectable({ providedIn: 'root' })
 export class AlumnosApi {
-  static readonly url = 'http://localhost:5042/Alumnos';
+  static readonly url = `${API_URL}/Alumnos`;
   private http = inject(HttpClient);
 
   crear(alumno: AlumnoRequest): Observable<AlumnoResponse> {

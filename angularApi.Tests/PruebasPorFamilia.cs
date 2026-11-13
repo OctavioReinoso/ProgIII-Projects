@@ -22,12 +22,18 @@ public class RelacionesMock : RelacionesTests { protected override string Acceso
 public class CalificacionesEF : CalificacionesTests { protected override string AccesoDatos => "EF"; }
 public class CalificacionesMock : CalificacionesTests { protected override string AccesoDatos => "Mock"; }
 
+public class AutenticacionEF : AutenticacionTests { protected override string AccesoDatos => "EF"; }
+public class AutenticacionMock : AutenticacionTests { protected override string AccesoDatos => "Mock"; }
+
+public class MinimoDocentesEF : MinimoDocentesTests { protected override string AccesoDatos => "EF"; }
+public class MinimoDocentesMock : MinimoDocentesTests { protected override string AccesoDatos => "Mock"; }
+
 public class FabricaTests
 {
     [Theory]
-    [InlineData("EF", typeof(EFDAOFactory), typeof(EFDAOAlumno), typeof(EFDAOMateria))]
-    [InlineData("Mock", typeof(MockDAOFactory), typeof(MockDAOAlumno), typeof(MockDAOMateria))]
-    public void La_configuracion_elige_una_familia_completa(string acceso, Type fabrica, Type daoAlumno, Type daoMateria)
+    [InlineData("EF", typeof(EFDAOFactory), typeof(EFDAOAlumno), typeof(EFDAOMateria), typeof(EFDAOUsuario))]
+    [InlineData("Mock", typeof(MockDAOFactory), typeof(MockDAOAlumno), typeof(MockDAOMateria), typeof(MockDAOUsuario))]
+    public void La_configuracion_elige_una_familia_completa(string acceso, Type fabrica, Type daoAlumno, Type daoMateria, Type daoUsuario)
     {
         using var api = new ApiDePrueba(acceso);
         using var scope = api.Services.CreateScope();
@@ -38,6 +44,7 @@ public class FabricaTests
         // Todos los productos salen de la misma familia: nunca se mezcla un DAO de EF con uno Mock.
         Assert.IsType(daoAlumno, factory.CrearDAOAlumno());
         Assert.IsType(daoMateria, factory.CrearDAOMateria());
+        Assert.IsType(daoUsuario, factory.CrearDAOUsuario());
     }
 
     [Fact]
@@ -51,5 +58,6 @@ public class FabricaTests
         Assert.Equal(2, division.Alumnos.Count);
         var boletin = await fabrica.CrearDAOAlumno().BoletinAsync(db.Alumnos.First(a => a.Legajo == "A-001").Id);
         Assert.Equal(2, boletin!.Count);
+        Assert.All(await fabrica.CrearDAOMateria().ListarAsync(), m => Assert.NotEmpty(m.Docentes));
     }
 }

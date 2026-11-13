@@ -56,13 +56,27 @@ public sealed class DivisionRequest
     public int Cupo { get; set; } = 30;
 }
 
-public sealed class MateriaRequest
+// Para modificar (PUT) sólo se cambian los datos de la materia, no sus docentes.
+public class MateriaRequest
 {
     [Required, StringLength(80, MinimumLength = 3)]
     public string Nombre { get; set; } = string.Empty;
 
     [Range(1, 10)]
     public int HorasSemanales { get; set; }
+}
+
+// Para crear (POST) hace falta al menos un docente: una materia nunca existe sin quien la dicte.
+public sealed class CrearMateriaRequest : MateriaRequest, IValidatableObject
+{
+    [Required, MinLength(1, ErrorMessage = "La materia necesita al menos un docente.")]
+    public List<long> DocenteIds { get; set; } = [];
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (DocenteIds?.Any(id => id <= 0) == true)
+            yield return new ValidationResult("Los ids de docentes deben ser positivos.", [nameof(DocenteIds)]);
+    }
 }
 
 public sealed class CalificacionRequest : IValidatableObject

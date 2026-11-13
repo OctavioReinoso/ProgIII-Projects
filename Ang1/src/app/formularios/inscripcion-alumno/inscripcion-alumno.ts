@@ -94,6 +94,7 @@ export class InscripcionAlumno {
   }
 
   private describirError(error: HttpErrorResponse): string {
+    if (error.status === 401) return 'Para guardar alumnos tenés que iniciar sesión (botón "Ingresar" arriba a la derecha).';
     if (error.status === 0) return 'No se pudo conectar con la API. ¿Está corriendo en http://localhost:5042?';
     if (error.status === 409) return error.error?.detail ?? 'Ya existe un alumno con ese DNI o legajo.';
     if (error.status === 400) return 'La API rechazó los datos (400).';

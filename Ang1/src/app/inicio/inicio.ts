@@ -25,7 +25,16 @@ import { RouterLink } from '@angular/router';
     </section>
 
     <section class="tarjeta">
-      <h2>Ejemplos</h2>
+      <h2>Gestión de la escuela</h2>
+      <ul class="indice">
+        <li><a routerLink="/ingresar">Ingresar o crear cuenta</a>: login con JWT; la contraseña se guarda con BCrypt.</li>
+        <li><a routerLink="/panel">Panel de gestión</a>: alta, edición y baja de alumnos, docentes, divisiones, materias y notas. Pide sesión.</li>
+        <li><a routerLink="/resumen-notas">Resumen de notas</a>: promedios con signal, computed y effect.</li>
+      </ul>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Ejemplos de Angular Forms</h2>
       <ol class="indice">
         <li><a routerLink="/materia-favorita">FormControl y setValue</a>: un campo y su sincronía con el modelo.</li>
         <li><a routerLink="/perfil-docente">FormGroup, grupo anidado, patchValue y ngSubmit</a>.</li>
